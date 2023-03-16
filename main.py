@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_redis_cache import FastApiRedisCache, cache
 from fastapi.encoders import jsonable_encoder
+from dotenv import load_dotenv
 import httpx
 import os
 
@@ -23,13 +24,14 @@ redis_cache = None
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
+load_dotenv()
 
 @app.on_event("startup")
 def startup():
     global redis_cache 
     redis_cache = FastApiRedisCache()
     redis_cache.init(
-        host_url=os.environ.get("REDIS_URL"),
+        host_url=os.getenv("REDIS_URL"),
         ignore_arg_types=[Request, Response]
     )
 
