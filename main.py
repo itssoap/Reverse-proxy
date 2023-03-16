@@ -29,7 +29,7 @@ def startup():
     global redis_cache 
     redis_cache = FastApiRedisCache()
     redis_cache.init(
-        host_url=os.environ.get("REDIS_URL", LOCAL_REDIS_URL),
+        host_url=os.environ.get("REDIS_URL"),
         ignore_arg_types=[Request, Response]
     )
 
