@@ -18,7 +18,6 @@ headers = {
         'Access-Control-Allow-Origin': 'http://127.0.0.1:8000'
     }
 
-LOCAL_REDIS_URL = "redis://default:ol7IhrdrAGZIqS3g8CDR@containers-us-west-97.railway.app:6054"
 
 redis_cache = None
 
