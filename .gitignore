@@ -1,5 +1,4 @@
 backup.py
-redis_cache.py
 __pycache__/
 
 *.pyc
