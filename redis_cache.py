@@ -9,7 +9,6 @@ I am rewriting it to cache the HTMLresponse of various pages
 """
 
 import aioredis
-from typing import List, Any 
 import asyncio
 from fastapi.responses import HTMLResponse
 import pickle
@@ -20,13 +19,18 @@ load_dotenv()
 redis = aioredis.from_url(os.getenv("REDIS_URL"), decode_responses=True)
 
 
-class RedisDB:
+class RedisCache:
 
 	@staticmethod
 	async def set(key: str, value: str, ttl: int | None = None, ignore_if_exists: bool = True) -> bool:
 		"""
-		Getting and setting data in redis. It take key and value pair argument as string. 
-		return 'True' if the operation is successful.
+		Set the value at ``key`` to ``value``
+		Returns 'True' if the operation is successful.
+		
+        ``ttl`` Time-to-live for a key, in ``int`` seconds 
+
+		``ignore_if_exists`` if True, it will ignore setting the key.
+				Set it to False to overwrite existing key-value
 		"""
 
 		if ttl is None:
@@ -40,8 +44,7 @@ class RedisDB:
 	@staticmethod
 	async def get(key: str) -> str:
 		"""
-		Take key as argument and return string value.
-		(It won't return value if that key don't store string class values.)	   
+		Returns the ``value`` of provided ``key``.   
 		"""
 
 		value = await redis.get(key)
@@ -49,39 +52,47 @@ class RedisDB:
 
 
 	@staticmethod
-	async def delete(key: str ) -> bool:
+	async def delete(key: str) -> bool:
 		"""
-		Take key as argument and delete the value from database.
-		(It can delete any type of key, value pair including  list, set, hash )
-		return 'True' if the operation is successful.
+		Deletes ``key``:``value`` pair from database, based on the ``key`` provided.
+		Returns 'True' if the operation is successful.
 		"""
 
 		value = await redis.delete(key) 
 		return False if value == 0 else True
 
 
-async def encoder(html: HTMLResponse) -> str:
-    return pickle.dumps(html).hex()
+	@staticmethod
+	async def encoder(html: HTMLResponse) -> str:
+		"""
+		Converts an ``HTMLResponse`` object to ``str`` of hex data.
+		"""
+		return pickle.dumps(html).hex()
 
-async def decoder(val: str) -> HTMLResponse:
-    return pickle.loads(bytes.fromhex(val))
+
+	@staticmethod
+	async def decoder(val: str) -> HTMLResponse:
+		"""
+		Converts hex data in ``val`` to the original ``HTMLResponse`` object.
+		"""
+		return pickle.loads(bytes.fromhex(val))
     
 
 async def main():
-	redis_l = RedisDB()
+	redis_l = RedisCache()
 
 	with open('response_test.txt') as f:
 		help_page = [line for line in f]
 	print(len(help_page))
 
 	obj = HTMLResponse(content=help_page[0], status_code=200)
-	enc_obj = await encoder(obj)
+	enc_obj = await redis_l.encoder(obj)
 
 	await redis_l.set("help", enc_obj, ttl=86400, ignore_if_exists=False)
 
 	val = await redis_l.get("help")
 
-	dec_obj = await decoder(str(val))
+	dec_obj = await redis_l.decoder(str(val))
 	print(dec_obj)
 
 
