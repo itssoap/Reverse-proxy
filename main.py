@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from dotenv import load_dotenv
 import httpx
 import os
+from redis_cache import RedisCache
 
 headers = {
         'Accept': '*/*',
@@ -123,20 +124,20 @@ async def getter() -> str:
 
 @app.get("/help", response_class=HTMLResponse)
 async def getter() -> str:
-    resp = ""
-    _, respo = redis_cache.check_cache("help")
-    
-    print(respo)
-    if respo is None:
+    # resp = ""
+    redi = RedisCache()
+    resp = redi.get("help")
+
+    if resp is None:
         try:
             resp = httpx.get(f"https://nyaa.si/help", headers=headers)
             
         except Exception:
             pass
-    # res = HTMLResponse(content=resp.text, status_code=200)
-    # res.body = jsonable_encoder({"status": "200"})
-    # res.headers['content-type'] = 'application/json'
-    
+
+    else:
+        return resp
+
     return HTMLResponse(content=resp.text, status_code=200)
 
 

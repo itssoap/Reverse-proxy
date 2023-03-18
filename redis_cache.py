@@ -21,8 +21,8 @@ redis = aioredis.from_url(os.getenv("REDIS_URL"), decode_responses=True)
 
 class RedisCache:
 
-	@staticmethod
-	async def set(key: str, value: str, ttl: int | None = None, ignore_if_exists: bool = True) -> bool:
+	@classmethod
+	async def set(cls, key: str, value: HTMLResponse, ttl: int | None = None, ignore_if_exists: bool = True) -> bool:
 		"""
 		Set the value at ``key`` to ``value``
 		Returns 'True' if the operation is successful.
@@ -33,6 +33,8 @@ class RedisCache:
 				Set it to False to overwrite existing key-value
 		"""
 
+		value = await cls.encoder(value)
+
 		if ttl is None:
 			result = await redis.set(key, value, nx=ignore_if_exists)
 
@@ -41,13 +43,14 @@ class RedisCache:
 		return result
 
 
-	@staticmethod
-	async def get(key: str) -> str:
+	@classmethod
+	async def get(cls, key: str) -> HTMLResponse:
 		"""
 		Returns the ``value`` of provided ``key``.   
 		"""
 
 		value = await redis.get(key)
+		value = await cls.decoder(value)
 		return value
 
 
@@ -63,7 +66,7 @@ class RedisCache:
 
 
 	@staticmethod
-	async def encoder(html: HTMLResponse) -> str:
+	async def encoder(self, html: HTMLResponse) -> str:
 		"""
 		Converts an ``HTMLResponse`` object to ``str`` of hex data.
 		"""
