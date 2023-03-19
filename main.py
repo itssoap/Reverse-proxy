@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import httpx
 import os
 from redis_cache import RedisCache
+from typing import Any
 
 headers = {
         'Accept': '*/*',
@@ -36,8 +37,8 @@ def startup():
         ignore_arg_types=[Request, Response]
     )
 
-@app.get("/", response_class=HTMLResponse)
-async def getter(request: Request) -> str:
+@app.get("/", response_class=HTMLResponse | Response)
+async def getter(request: Request) -> Any:
     resp = ""
     params = request.query_params
     print(params, flush=True)
@@ -63,7 +64,7 @@ async def getter(request: Request) -> str:
 
 @app.get("/view/{view_id}", response_class=HTMLResponse)
 @cache()
-async def getter(view_id:int | None = None):
+async def getter(view_id:int | None = None) -> HTMLResponse:
     # page:str | None = None
     resp = ""
     try:
@@ -84,8 +85,8 @@ async def getter(view_id:int | None = None):
     return HTMLResponse(content=resp.text, status_code=200) #if page is None else Response(content=resp.text, media_type="application/xml")
     
     
-@app.get("/download/{torrent}", response_class=HTMLResponse)
-async def getter(torrent:str | None = None) -> str:
+@app.get("/download/{torrent}", response_class=Response)
+async def getter(torrent:str | None = None) -> Response:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/download/{torrent}", headers=headers)
@@ -98,7 +99,7 @@ async def getter(torrent:str | None = None) -> str:
 
 @app.get("/user/{username}", response_class=HTMLResponse)
 @cache()
-async def getter(username:str | None = None) -> str:
+async def getter(username:str | None = None) -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/user/{username}", headers=headers)
@@ -111,7 +112,7 @@ async def getter(username:str | None = None) -> str:
 
 @app.get("/rules", response_class=HTMLResponse)
 @cache()
-async def getter() -> str:
+async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/rules", headers=headers)
@@ -123,11 +124,11 @@ async def getter() -> str:
 
 
 @app.get("/help", response_class=HTMLResponse)
-async def getter() -> str:
+async def getter() -> HTMLResponse:
     # resp = ""
     redi = RedisCache()
-    resp = redi.get("help")
-
+    resp = await redi.get("help")
+    print(resp)
     if resp is None:
         try:
             resp = httpx.get(f"https://nyaa.si/help", headers=headers)
@@ -136,14 +137,14 @@ async def getter() -> str:
             pass
 
     else:
-        return resp
+        return HTMLResponse(content=resp)
 
     return HTMLResponse(content=resp.text, status_code=200)
 
 
 @app.get("/login", response_class=HTMLResponse)
 @cache()
-async def getter() -> str:
+async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/login", headers=headers)
@@ -156,7 +157,7 @@ async def getter() -> str:
 
 @app.get("/register", response_class=HTMLResponse)
 @cache()
-async def getter() -> str:
+async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/register", headers=headers)
@@ -168,7 +169,7 @@ async def getter() -> str:
 
 
 @app.get("/upload", response_class=HTMLResponse)
-async def getter() -> str:
+async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/upload", headers=headers)
