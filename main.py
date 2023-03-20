@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from dotenv import load_dotenv
 import httpx
 import os
+from aioredis import Redis, from_url
 from redis_cache import RedisCache
 from typing import Any
 
@@ -22,20 +23,22 @@ headers = {
     }
 
 
-redis_cache = None
-
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
 load_dotenv()
+redis_cache = RedisCache()
+redis = Redis()
 
 @app.on_event("startup")
 def startup():
-    global redis_cache 
-    redis_cache = FastApiRedisCache()
-    redis_cache.init(
-        host_url=os.getenv("REDIS_URL"),
-        ignore_arg_types=[Request, Response]
-    )
+    load_dotenv()
+    global redis_cache, redis 
+    redis_cache = RedisCache()
+    
+    print(os.getenv("REDIS_URL"))
+    redis = from_url(os.getenv("REDIS_URL"), decode_responses=True)
+
 
 @app.get("/", response_class=HTMLResponse | Response)
 async def getter(request: Request) -> Any:
@@ -126,18 +129,19 @@ async def getter() -> HTMLResponse:
 @app.get("/help", response_class=HTMLResponse)
 async def getter() -> HTMLResponse:
     # resp = ""
-    redi = RedisCache()
-    resp = await redi.get("help")
-    print(resp)
+    resp = await redis_cache.get(redis, "help")
+    # print(resp)
+    # resp = httpx.get(f"https://nyaa.si/help", headers=headers)
     if resp is None:
         try:
             resp = httpx.get(f"https://nyaa.si/help", headers=headers)
+            await redis_cache.set(redis, "help", HTMLResponse(content=resp.text, status_code=200), ttl=86400, ignore_if_exists=False)
             
-        except Exception:
-            pass
+        except Exception as e:
+            raise e
 
     else:
-        return HTMLResponse(content=resp)
+        return resp
 
     return HTMLResponse(content=resp.text, status_code=200)
 

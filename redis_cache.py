@@ -13,16 +13,17 @@ import asyncio
 from fastapi.responses import HTMLResponse
 import pickle
 from dotenv import load_dotenv
+from aioredis import Redis
 import os
 
-load_dotenv()
-redis = aioredis.from_url(os.getenv("REDIS_URL"), decode_responses=True)
+# load_dotenv()
+# redis = aioredis.from_url(os.getenv("REDIS_URL"), decode_responses=True)
 
 
 class RedisCache:
 
 	@classmethod
-	async def set(cls, key: str, value: HTMLResponse, ttl: int | None = None, ignore_if_exists: bool = True) -> bool:
+	async def set(cls, redis: Redis, key: str, value: HTMLResponse, ttl: int | None = None, ignore_if_exists: bool = True) -> bool:
 		"""
 		Set the value at ``key`` to ``value``
 		Returns 'True' if the operation is successful.
@@ -40,22 +41,26 @@ class RedisCache:
 
 		else:
 			result = await redis.set(key, value, ex=ttl, nx=ignore_if_exists)
+			
 		return result
 
 
 	@classmethod
-	async def get(cls, key: str) -> HTMLResponse:
+	async def get(cls, redis: Redis, key: str) -> HTMLResponse:
 		"""
 		Returns the ``value`` of provided ``key``.   
 		"""
 
 		value = await redis.get(key)
-		value = await cls.decoder(value)
+		print(value)
+		if value is not None:
+			value = await cls.decoder(value)
+
 		return value
 
 
 	@staticmethod
-	async def delete(key: str) -> bool:
+	async def delete(redis: Redis, key: str) -> bool:
 		"""
 		Deletes ``key``:``value`` pair from database, based on the ``key`` provided.
 		Returns 'True' if the operation is successful.
@@ -66,7 +71,7 @@ class RedisCache:
 
 
 	@staticmethod
-	async def encoder(self, html: HTMLResponse) -> str:
+	async def encoder(html: HTMLResponse) -> str:
 		"""
 		Converts an ``HTMLResponse`` object to ``str`` of hex data.
 		"""
@@ -81,23 +86,23 @@ class RedisCache:
 		return pickle.loads(bytes.fromhex(val))
     
 
-async def main():
-	redis_l = RedisCache()
+# async def main():
+# 	redis_l = RedisCache()
 
-	with open('response_test.txt') as f:
-		help_page = [line for line in f]
-	print(len(help_page))
+# 	with open('response_test.txt') as f:
+# 		help_page = [line for line in f]
+# 	print(len(help_page))
 
-	obj = HTMLResponse(content=help_page[0], status_code=200)
-	enc_obj = await redis_l.encoder(obj)
+# 	obj = HTMLResponse(content=help_page[0], status_code=200)
+# 	enc_obj = await redis_l.encoder(obj)
 
-	await redis_l.set("help", enc_obj, ttl=86400, ignore_if_exists=False)
+# 	await redis_l.set("help", enc_obj, ttl=86400, ignore_if_exists=False)
 
-	val = await redis_l.get("help")
+# 	val = await redis_l.get("help")
 
-	dec_obj = await redis_l.decoder(str(val))
-	print(dec_obj)
+# 	dec_obj = await redis_l.decoder(str(val))
+# 	print(dec_obj)
 
 
-if __name__ == '__main__':
-    asyncio.run(main())
+# if __name__ == '__main__':
+#     asyncio.run(main())
