@@ -1,14 +1,12 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi_redis_cache import FastApiRedisCache, cache
-from fastapi.encoders import jsonable_encoder
+
 from dotenv import load_dotenv
 import httpx
 import os
 from aioredis import Redis, from_url
 from redis_cache import RedisCache
-from typing import Any
 
 headers = {
         'Accept': '*/*',
@@ -70,7 +68,6 @@ async def getter(request: Request) -> Response:
 
 
 @app.get("/view/{view_id}", response_class=HTMLResponse)
-@cache()
 async def getter(view_id:int | None = None) -> HTMLResponse:
     # page:str | None = None
     resp = ""
@@ -105,7 +102,6 @@ async def getter(torrent:str | None = None) -> Response:
 
 
 @app.get("/user/{username}", response_class=HTMLResponse)
-@cache()
 async def getter(username:str | None = None) -> HTMLResponse:
     resp = ""
     try:
@@ -118,7 +114,6 @@ async def getter(username:str | None = None) -> HTMLResponse:
 
 
 @app.get("/rules", response_class=HTMLResponse)
-@cache()
 async def getter() -> HTMLResponse:
     resp = ""
     try:
@@ -151,7 +146,6 @@ async def getter() -> HTMLResponse:
 
 
 @app.get("/login", response_class=HTMLResponse)
-@cache()
 async def getter() -> HTMLResponse:
     resp = ""
     try:
@@ -164,7 +158,6 @@ async def getter() -> HTMLResponse:
 
 
 @app.get("/register", response_class=HTMLResponse)
-@cache()
 async def getter() -> HTMLResponse:
     resp = ""
     try:
