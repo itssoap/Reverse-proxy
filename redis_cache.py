@@ -41,7 +41,7 @@ class RedisCache:
 
 		else:
 			result = await redis.set(key, value, ex=ttl, nx=ignore_if_exists)
-			
+
 		return result
 
 
@@ -52,7 +52,7 @@ class RedisCache:
 		"""
 
 		value = await redis.get(key)
-		print(value)
+		# print(value)
 		if value is not None:
 			value = await cls.decoder(value)
 
