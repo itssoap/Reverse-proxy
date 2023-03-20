@@ -26,7 +26,7 @@ headers = {
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-load_dotenv()
+# load_dotenv()
 redis_cache = RedisCache()
 redis = Redis()
 
@@ -40,8 +40,8 @@ def startup():
     redis = from_url(os.getenv("REDIS_URL"), decode_responses=True)
 
 
-@app.get("/", response_class=HTMLResponse | Response)
-async def getter(request: Request) -> Any:
+@app.get("/", response_model=None, response_class=Response)
+async def getter(request: Request) -> Response:
     resp = ""
     params = request.query_params
     print(params, flush=True)
@@ -62,7 +62,11 @@ async def getter(request: Request) -> Any:
     except KeyError:
         flag = 1
         
-    return HTMLResponse(content=resp.text, status_code=200) if flag == 1 else Response(content=resp.text, media_type="application/xml")
+    # returning a Respone class with media_type HTML to avoid using Union of HTMLResponse and Response
+    # The Union breaks the endpoint /docs, as it tries to look up media_type json for openapi.json
+
+    return Response(content=resp.text, status_code=200, media_type="text/html") \
+            if flag == 1 else Response(content=resp.text, media_type="application/xml")
 
 
 @app.get("/view/{view_id}", response_class=HTMLResponse)
