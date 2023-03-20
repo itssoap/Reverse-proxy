@@ -8,13 +8,9 @@ I am rewriting it to cache the HTMLresponse of various pages
 
 """
 
-import aioredis
-import asyncio
 from fastapi.responses import HTMLResponse
 import pickle
-from dotenv import load_dotenv
 from aioredis import Redis
-import os
 
 # load_dotenv()
 # redis = aioredis.from_url(os.getenv("REDIS_URL"), decode_responses=True)
@@ -84,7 +80,7 @@ class RedisCache:
 		Converts hex data in ``val`` to the original ``HTMLResponse`` object.
 		"""
 		return pickle.loads(bytes.fromhex(val))
-		   
+
 
 # async def main():
 # 	redis_l = RedisCache()
