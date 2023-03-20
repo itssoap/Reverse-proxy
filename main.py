@@ -60,7 +60,7 @@ async def getter(request: Request) -> Response:
         temp = params["page"]
     except KeyError:
         flag = 1
-        
+
     # returning a Respone class with media_type HTML to avoid using Union of HTMLResponse and Response
     # The Union breaks the endpoint /docs, as it tries to look up media_type json for openapi.json
 
@@ -77,15 +77,15 @@ async def getter(view_id: int | None = None) -> HTMLResponse:
             # resp = httpx.get(f"https://nyaa.si/view/{view_id}?page={page}", headers=headers)
         # else:
         resp = httpx.get(f"https://nyaa.si/view/{view_id}", headers=headers)
-        
+
     except Exception:
         pass
-    
+
     # try:
     #     resp = resp.text
     #     
     # except:
-    #     resp = resp     
+    #     resp = resp
     
     return HTMLResponse(content=resp.text, status_code=200) #if page is None else Response(content=resp.text, media_type="application/xml")
 
