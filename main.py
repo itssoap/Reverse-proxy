@@ -33,7 +33,7 @@ def startup():
     load_dotenv()
     global redis_cache, redis 
     redis_cache = RedisCache()
-    
+
     print(os.getenv("REDIS_URL"))
     redis = from_url(os.getenv("REDIS_URL"), decode_responses=True)
 
@@ -46,15 +46,15 @@ async def getter(request: Request) -> Response:
     try:
         if params is not None:
             resp = httpx.get(f"https://nyaa.si/?{params}", headers=headers)
-        
+
         else:
             resp = httpx.get(f"https://nyaa.si/", headers=headers)
-        
+
     except Exception:
         pass
-    
+
     flag = 0
-    
+
     try:
         temp = params["page"]
     except KeyError:
@@ -82,22 +82,22 @@ async def getter(view_id:int | None = None) -> HTMLResponse:
     
     # try:
     #     resp = resp.text
-    
+    #     
     # except:
-    #     resp = resp
-        
+    #     resp = resp     
+    
     return HTMLResponse(content=resp.text, status_code=200) #if page is None else Response(content=resp.text, media_type="application/xml")
-    
-    
+
+
 @app.get("/download/{torrent}", response_class=Response)
 async def getter(torrent:str | None = None) -> Response:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/download/{torrent}", headers=headers)
-        
+
     except Exception:
         pass
-        
+
     return Response(content=resp.text, media_type="application/x-bittorrent")
 
 
@@ -106,10 +106,10 @@ async def getter(username:str | None = None) -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/user/{username}", headers=headers)
-        
+
     except Exception:
         pass
-        
+
     return HTMLResponse(content=resp.text, status_code=200)
 
 
@@ -118,10 +118,10 @@ async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/rules", headers=headers)
-        
+
     except Exception:
         pass
-        
+
     return HTMLResponse(content=resp.text, status_code=200)
 
 
@@ -135,7 +135,7 @@ async def getter() -> HTMLResponse:
         try:
             resp = httpx.get(f"https://nyaa.si/help", headers=headers)
             await redis_cache.set(redis, "help", HTMLResponse(content=resp.text, status_code=200), ttl=86400, ignore_if_exists=False)
-            
+
         except Exception as e:
             raise e
 
@@ -150,10 +150,10 @@ async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/login", headers=headers)
-        
+
     except Exception:
         pass
-        
+
     return HTMLResponse(content=resp.text, status_code=200)
 
 
@@ -162,10 +162,10 @@ async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/register", headers=headers)
-        
+
     except Exception:
         pass
-        
+            
     return HTMLResponse(content=resp.text, status_code=200)
 
 

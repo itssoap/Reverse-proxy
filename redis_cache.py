@@ -28,7 +28,7 @@ class RedisCache:
 		Set the value at ``key`` to ``value``
 		Returns 'True' if the operation is successful.
 		
-		``ttl`` Time-to-live for a key, in ``int`` seconds 
+		``ttl`` Time-to-live for a key, in ``int`` seconds.
 
 		``ignore_if_exists`` if True, it will ignore setting the key.
 				Set it to False to overwrite existing key-value
@@ -84,7 +84,7 @@ class RedisCache:
 		Converts hex data in ``val`` to the original ``HTMLResponse`` object.
 		"""
 		return pickle.loads(bytes.fromhex(val))
-    
+		   
 
 # async def main():
 # 	redis_l = RedisCache()
