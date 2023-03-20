@@ -68,7 +68,7 @@ async def getter(request: Request) -> Response:
 
 
 @app.get("/view/{view_id}", response_class=HTMLResponse)
-async def getter(view_id:int | None = None) -> HTMLResponse:
+async def getter(view_id: int | None = None) -> HTMLResponse:
     # page:str | None = None
     resp = ""
     try:
@@ -90,7 +90,7 @@ async def getter(view_id:int | None = None) -> HTMLResponse:
 
 
 @app.get("/download/{torrent}", response_class=Response)
-async def getter(torrent:str | None = None) -> Response:
+async def getter(torrent: str | None = None) -> Response:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/download/{torrent}", headers=headers)
@@ -102,7 +102,7 @@ async def getter(torrent:str | None = None) -> Response:
 
 
 @app.get("/user/{username}", response_class=HTMLResponse)
-async def getter(username:str | None = None) -> HTMLResponse:
+async def getter(username: str | None = None) -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/user/{username}", headers=headers)
@@ -165,7 +165,7 @@ async def getter() -> HTMLResponse:
 
     except Exception:
         pass
-            
+
     return HTMLResponse(content=resp.text, status_code=200)
 
 
