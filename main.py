@@ -54,7 +54,7 @@ async def getter(request: Request) -> Response:
     except httpx.HTTPError as exc:
         log_time = datetime.datetime.now()
         print(f"[{log_time}] [/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
-        
+
     flag = 0
 
     try:
@@ -79,7 +79,7 @@ async def getter(view_id: int | None = None) -> HTMLResponse:
     except httpx.HTTPError as exc:
         log_time = datetime.datetime.now()
         print(f"[{log_time}] [/view/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
-    
+
     return HTMLResponse(content=resp.text, status_code=200)
 
 
@@ -129,7 +129,7 @@ async def getter() -> HTMLResponse:
 async def getter() -> HTMLResponse:
     # resp = ""
     resp = await redis_cache.get(redis, "help")
-    
+
     if resp is None:
         try:
             resp = httpx.get(f"https://nyaa.si/help", headers=headers)
