@@ -20,7 +20,7 @@ class RedisCache:
 		"""
 		Set the value at ``key`` to ``value``
 		Returns 'True' if the operation is successful.
-		
+
 		``ttl`` Time-to-live for a key, in ``int`` seconds.
 
 		``ignore_if_exists`` if True, it will ignore setting the key.
