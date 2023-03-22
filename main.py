@@ -5,9 +5,10 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 import httpx
 import os
-from aioredis import Redis, from_url
+from aioredis import Redis, from_url, ConnectionError, TimeoutError
 from redis_cache import RedisCache
 from uvicorn import run
+import datetime
 
 headers = {
         'Accept': '*/*',
@@ -34,8 +35,6 @@ def startup():
     load_dotenv()
     global redis_cache, redis 
     redis_cache = RedisCache()
-
-    print(os.getenv("REDIS_URL"))
     redis = from_url(os.getenv("REDIS_URL"), decode_responses=True)
 
 
@@ -43,17 +42,19 @@ def startup():
 async def getter(request: Request) -> Response:
     resp = ""
     params = request.query_params
-    print(params, flush=True)
     try:
         if params is not None:
             resp = httpx.get(f"https://nyaa.si/?{params}", headers=headers)
+            resp.raise_for_status()
 
         else:
             resp = httpx.get(f"https://nyaa.si/", headers=headers)
+            resp.raise_for_status()
 
-    except Exception:
-        pass
-
+    except httpx.HTTPError as exc:
+        log_time = datetime.datetime.now()
+        print(f"[{log_time}] [/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
+        
     flag = 0
 
     try:
@@ -70,24 +71,16 @@ async def getter(request: Request) -> Response:
 
 @app.get("/view/{view_id}", response_class=HTMLResponse)
 async def getter(view_id: int | None = None) -> HTMLResponse:
-    # page:str | None = None
     resp = ""
     try:
-        # if page is not None:
-            # resp = httpx.get(f"https://nyaa.si/view/{view_id}?page={page}", headers=headers)
-        # else:
         resp = httpx.get(f"https://nyaa.si/view/{view_id}", headers=headers)
+        resp.raise_for_status()
 
-    except Exception:
-        pass
-
-    # try:
-    #     resp = resp.text
-    #     
-    # except:
-    #     resp = resp
+    except httpx.HTTPError as exc:
+        log_time = datetime.datetime.now()
+        print(f"[{log_time}] [/view/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
     
-    return HTMLResponse(content=resp.text, status_code=200) #if page is None else Response(content=resp.text, media_type="application/xml")
+    return HTMLResponse(content=resp.text, status_code=200)
 
 
 @app.get("/download/{torrent}", response_class=Response)
@@ -95,9 +88,11 @@ async def getter(torrent: str | None = None) -> Response:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/download/{torrent}", headers=headers)
+        resp.raise_for_status()
 
-    except Exception:
-        pass
+    except httpx.HTTPError as exc:
+        log_time = datetime.datetime.now()
+        print(f"[{log_time}] [/download/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
 
     return Response(content=resp.text, media_type="application/x-bittorrent")
 
@@ -107,9 +102,11 @@ async def getter(username: str | None = None) -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/user/{username}", headers=headers)
+        resp.raise_for_status()
 
-    except Exception:
-        pass
+    except httpx.HTTPError as exc:
+        log_time = datetime.datetime.now()
+        print(f"[{log_time}] [/user/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
 
     return HTMLResponse(content=resp.text, status_code=200)
 
@@ -119,9 +116,11 @@ async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/rules", headers=headers)
+        resp.raise_for_status()
 
-    except Exception:
-        pass
+    except httpx.HTTPError as exc:
+        log_time = datetime.datetime.now()
+        print(f"[{log_time}] [/rules/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
 
     return HTMLResponse(content=resp.text, status_code=200)
 
@@ -130,15 +129,20 @@ async def getter() -> HTMLResponse:
 async def getter() -> HTMLResponse:
     # resp = ""
     resp = await redis_cache.get(redis, "help")
-    # print(resp)
-    # resp = httpx.get(f"https://nyaa.si/help", headers=headers)
+    
     if resp is None:
         try:
             resp = httpx.get(f"https://nyaa.si/help", headers=headers)
+            resp.raise_for_status()
             await redis_cache.set(redis, "help", HTMLResponse(content=resp.text, status_code=200), ttl=86400, ignore_if_exists=False)
 
-        except Exception as e:
-            raise e
+        except httpx.HTTPError as exc:
+            log_time = datetime.datetime.now()
+            print(f"[{log_time}] [/help/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
+
+        except (ConnectionError, TimeoutError) as redexc:
+            log_time = datetime.datetime.now()
+            print(f"[{log_time}] [/help/] Redis Exception occurred - {redexc}", flush=True)
 
     else:
         return resp
@@ -151,9 +155,11 @@ async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/login", headers=headers)
+        resp.raise_for_status()
 
-    except Exception:
-        pass
+    except httpx.HTTPError as exc:
+        log_time = datetime.datetime.now()
+        print(f"[{log_time}] [/login/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
 
     return HTMLResponse(content=resp.text, status_code=200)
 
@@ -163,9 +169,11 @@ async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/register", headers=headers)
+        resp.raise_for_status()
 
-    except Exception:
-        pass
+    except httpx.HTTPError as exc:
+        log_time = datetime.datetime.now()
+        print(f"[{log_time}] [/register/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
 
     return HTMLResponse(content=resp.text, status_code=200)
 
@@ -175,9 +183,11 @@ async def getter() -> HTMLResponse:
     resp = ""
     try:
         resp = httpx.get(f"https://nyaa.si/upload", headers=headers)
+        resp.raise_for_status()
 
-    except Exception:
-        pass
+    except httpx.HTTPError as exc:
+        log_time = datetime.datetime.now()
+        print(f"[{log_time}] [/upload/] HTTP Exception for {exc.request.url} - {exc}", flush=True)
 
     return HTMLResponse(content=resp.text, status_code=200)
 

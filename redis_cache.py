@@ -12,9 +12,6 @@ from fastapi.responses import HTMLResponse
 import pickle
 from aioredis import Redis
 
-# load_dotenv()
-# redis = aioredis.from_url(os.getenv("REDIS_URL"), decode_responses=True)
-
 
 class RedisCache:
 
@@ -80,25 +77,3 @@ class RedisCache:
 		Converts hex data in ``val`` to the original ``HTMLResponse`` object.
 		"""
 		return pickle.loads(bytes.fromhex(val))
-
-
-# async def main():
-# 	redis_l = RedisCache()
-
-# 	with open('response_test.txt') as f:
-# 		help_page = [line for line in f]
-# 	print(len(help_page))
-
-# 	obj = HTMLResponse(content=help_page[0], status_code=200)
-# 	enc_obj = await redis_l.encoder(obj)
-
-# 	await redis_l.set("help", enc_obj, ttl=86400, ignore_if_exists=False)
-
-# 	val = await redis_l.get("help")
-
-# 	dec_obj = await redis_l.decoder(str(val))
-# 	print(dec_obj)
-
-
-# if __name__ == '__main__':
-#     asyncio.run(main())
