@@ -68,7 +68,7 @@ class RedisCache:
 		"""
 		Converts an ``HTMLResponse`` object to ``str`` of hex data.
 		"""
-		return pickle.dumps(html).hex()
+		return pickle.dumps(html, pickle.HIGHEST_PROTOCOL).hex()
 
 
 	@staticmethod
