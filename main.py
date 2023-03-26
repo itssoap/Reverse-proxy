@@ -7,8 +7,15 @@ import httpx
 import os
 from aioredis import Redis, from_url, ConnectionError, TimeoutError
 from redis_cache import RedisCache
-from uvicorn import run
 import datetime
+import psutil
+from gunicorn.app.wsgiapp import WSGIApplication
+import sys
+
+# logging
+import logging
+from gunicorn.glogging import Logger
+from loguru import logger
 
 headers = {
         'Accept': '*/*',
@@ -30,12 +37,61 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 redis_cache = RedisCache()
 redis = Redis()
 
+log_level = logging.getLevelName("INFO")
+access_log_level = logging.getLevelName("INFO")
+json_logs = False # set it to True if you don't love yourselves
+
 @app.on_event("startup")
 def startup():
     load_dotenv()
     global redis_cache, redis 
     redis_cache = RedisCache()
     redis = from_url(os.getenv("REDIS_URL"), decode_responses=True)
+
+
+class InterceptHandler(logging.Handler):
+    def emit(self, record):
+        # Get corresponding Loguru level if it exists
+        try:
+            level = logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        # Find caller from where originated the logged message
+        frame, depth = logging.currentframe(), 2
+        while frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+
+class StubbedGunicornLogger(Logger):
+    def setup(self, cfg):
+        handler = logging.NullHandler()
+        self.error_logger = logging.getLogger("gunicorn.error")
+        self.error_logger.addHandler(handler)
+        self.access_logger = logging.getLogger("gunicorn.access")
+        self.access_logger.addHandler(handler)
+        self.error_logger.setLevel(log_level)
+        self.access_logger.setLevel(access_log_level)
+
+
+class StandaloneApplication(WSGIApplication):
+    def __init__(self, app_uri, options=None):
+        self.options = options or {}
+        self.app_uri = app_uri
+        super().__init__()
+
+    def load_config(self):
+        config = {
+            key: value
+            for key, value in self.options.items()
+            if key in self.cfg.settings and value is not None
+        }
+        for key, value in config.items():
+            self.cfg.set(key.lower(), value)
+
 
 
 @app.get("/", response_model=None, response_class=Response)
@@ -193,4 +249,33 @@ async def getter() -> HTMLResponse:
 
 
 if __name__ == '__main__':
-    run("main:app", host="127.0.0.1", port=8000, reload=True)
+    intercept_handler = InterceptHandler()
+    logging.root.setLevel(log_level)
+    seen = set()
+    for name in [
+        *logging.root.manager.loggerDict.keys(),
+        "gunicorn",
+        "gunicorn.access",
+        "gunicorn.error",
+        "uvicorn",
+        "uvicorn.access",
+        "uvicorn.error",
+    ]:
+        if name not in seen:
+            seen.add(name.split(".")[0])
+            logging.getLogger(name).handlers = [intercept_handler]
+
+    logger.configure(handlers=[{"sink": sys.stdout, "serialize": json_logs}])
+
+    options = {
+        "bind": "127.0.0.1:8000",
+        "workers": len(psutil.Process().cpu_affinity()),
+        "accesslog": "-",
+        "errorlog": "-",
+        "worker_class": "uvicorn.workers.UvicornWorker",
+        "logger_class": StubbedGunicornLogger,
+        "reload": "True",
+        "reload_engine": "inotify" # requires inotify package
+    }
+
+    StandaloneApplication("main:app", options).run()
