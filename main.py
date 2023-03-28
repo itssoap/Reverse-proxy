@@ -50,8 +50,8 @@ def startup():
 
 
 @app.get("/", response_model=None, response_class=Response)
-async def getter(request: Request) -> Response:
-    resp = ""
+async def getter(request: Request) -> Response: # type: ignore
+    resp = httpx.Response(status_code=404, text="Default")
     params = request.query_params
     try:
         if params is not None:
@@ -81,8 +81,8 @@ async def getter(request: Request) -> Response:
 
 
 @app.get("/view/{view_id}", response_class=HTMLResponse)
-async def getter(view_id: int | None = None) -> HTMLResponse:
-    resp = ""
+async def getter(view_id: int | None = None) -> HTMLResponse: # type: ignore
+    resp = httpx.Response(status_code=404, text="Default")
     try:
         resp = httpx.get(f"https://nyaa.si/view/{view_id}", headers=headers)
         resp.raise_for_status()
@@ -95,8 +95,8 @@ async def getter(view_id: int | None = None) -> HTMLResponse:
 
 
 @app.get("/download/{torrent}", response_class=Response)
-async def getter(torrent: str | None = None) -> Response:
-    resp = ""
+async def getter(torrent: str | None = None) -> Response: # type: ignore
+    resp = httpx.Response(status_code=404, text="Default")
     try:
         resp = httpx.get(f"https://nyaa.si/download/{torrent}", headers=headers)
         resp.raise_for_status()
@@ -109,8 +109,8 @@ async def getter(torrent: str | None = None) -> Response:
 
 
 @app.get("/user/{username}", response_class=HTMLResponse)
-async def getter(username: str | None = None) -> HTMLResponse:
-    resp = ""
+async def getter(username: str | None = None) -> HTMLResponse: # type: ignore
+    resp = httpx.Response(status_code=404, text="Default")
     try:
         resp = httpx.get(f"https://nyaa.si/user/{username}", headers=headers)
         resp.raise_for_status()
@@ -123,8 +123,8 @@ async def getter(username: str | None = None) -> HTMLResponse:
 
 
 @app.get("/rules", response_class=HTMLResponse)
-async def getter() -> HTMLResponse:
-    resp = ""
+async def getter() -> HTMLResponse: # type: ignore
+    resp = httpx.Response(status_code=404, text="Default")
     try:
         resp = httpx.get(f"https://nyaa.si/rules", headers=headers)
         resp.raise_for_status()
@@ -137,7 +137,7 @@ async def getter() -> HTMLResponse:
 
 
 @app.get("/help", response_class=HTMLResponse)
-async def getter() -> HTMLResponse:
+async def getter() -> HTMLResponse: # type: ignore
     # resp = ""
     resp = await redis_cache.get(redis, "help")
 
@@ -162,8 +162,8 @@ async def getter() -> HTMLResponse:
 
 
 @app.get("/login", response_class=HTMLResponse)
-async def getter() -> HTMLResponse:
-    resp = ""
+async def getter() -> HTMLResponse: # type: ignore
+    resp = httpx.Response(status_code=404, text="Default")
     try:
         resp = httpx.get(f"https://nyaa.si/login", headers=headers)
         resp.raise_for_status()
@@ -176,8 +176,8 @@ async def getter() -> HTMLResponse:
 
 
 @app.get("/register", response_class=HTMLResponse)
-async def getter() -> HTMLResponse:
-    resp = ""
+async def getter() -> HTMLResponse: # type: ignore
+    resp = httpx.Response(status_code=404, text="Default")
     try:
         resp = httpx.get(f"https://nyaa.si/register", headers=headers)
         resp.raise_for_status()
@@ -191,7 +191,7 @@ async def getter() -> HTMLResponse:
 
 @app.get("/upload", response_class=HTMLResponse)
 async def getter() -> HTMLResponse:
-    resp = ""
+    resp = httpx.Response(status_code=404, text="Default")
     try:
         resp = httpx.get(f"https://nyaa.si/upload", headers=headers)
         resp.raise_for_status()
@@ -224,7 +224,7 @@ if __name__ == '__main__':
 
     options = {
         "bind": "127.0.0.1:8000",
-        "workers": len(psutil.Process().cpu_affinity()),
+        "workers": len(psutil.Process().cpu_affinity()), # type: ignore
         "accesslog": "-",
         "errorlog": "-",
         "worker_class": "uvicorn.workers.UvicornWorker",
