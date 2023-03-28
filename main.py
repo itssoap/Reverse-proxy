@@ -16,6 +16,7 @@ import sys
 import logging
 from gunicorn.glogging import Logger
 from loguru import logger
+from info_logger import StubbedGunicornLogger, InterceptHandler, StandaloneApplication
 
 headers = {
         'Accept': '*/*',
@@ -37,9 +38,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 redis_cache = RedisCache()
 redis = Redis()
 
-log_level = logging.getLevelName("INFO")
-access_log_level = logging.getLevelName("INFO")
 json_logs = False # set it to True if you don't love yourselves
+log_level = logging.getLevelName("INFO")
 
 @app.on_event("startup")
 def startup():
@@ -47,51 +47,6 @@ def startup():
     global redis_cache, redis 
     redis_cache = RedisCache()
     redis = from_url(os.getenv("REDIS_URL"), decode_responses=True)
-
-
-class InterceptHandler(logging.Handler):
-    def emit(self, record):
-        # Get corresponding Loguru level if it exists
-        try:
-            level = logger.level(record.levelname).name
-        except ValueError:
-            level = record.levelno
-
-        # Find caller from where originated the logged message
-        frame, depth = logging.currentframe(), 2
-        while frame.f_code.co_filename == logging.__file__:
-            frame = frame.f_back
-            depth += 1
-
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
-
-
-class StubbedGunicornLogger(Logger):
-    def setup(self, cfg):
-        handler = logging.NullHandler()
-        self.error_logger = logging.getLogger("gunicorn.error")
-        self.error_logger.addHandler(handler)
-        self.access_logger = logging.getLogger("gunicorn.access")
-        self.access_logger.addHandler(handler)
-        self.error_logger.setLevel(log_level)
-        self.access_logger.setLevel(access_log_level)
-
-
-class StandaloneApplication(WSGIApplication):
-    def __init__(self, app_uri, options=None):
-        self.options = options or {}
-        self.app_uri = app_uri
-        super().__init__()
-
-    def load_config(self):
-        config = {
-            key: value
-            for key, value in self.options.items()
-            if key in self.cfg.settings and value is not None
-        }
-        for key, value in config.items():
-            self.cfg.set(key.lower(), value)
-
 
 
 @app.get("/", response_model=None, response_class=Response)
