@@ -1,5 +1,6 @@
 backup.py
 __pycache__/
+.vscode/
 
 *.pyc
 .env
