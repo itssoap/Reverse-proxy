@@ -1,1 +1,2 @@
-static/* linguist-vendored
+static/css* linguist-vendored
+static/js* linguist-vendored
