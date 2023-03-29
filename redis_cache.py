@@ -27,13 +27,13 @@ class RedisCache:
 				Set it to False to overwrite existing key-value
 		"""
 
-		value = await cls.encoder(value)
+		value_enc = await cls.encoder(value)
 
 		if ttl is None:
-			result = await redis.set(key, value, nx=ignore_if_exists)
+			result = await redis.set(key, value_enc, nx=ignore_if_exists)
 
 		else:
-			result = await redis.set(key, value, ex=ttl, nx=ignore_if_exists)
+			result = await redis.set(key, value_enc, ex=ttl, nx=ignore_if_exists)
 
 		return result
 
