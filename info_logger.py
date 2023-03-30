@@ -24,7 +24,9 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        logger.opt(depth=depth, exception=record.exc_info).log(
+            level, record.getMessage()
+        )
 
 
 class StubbedGunicornLogger(Logger):
@@ -53,4 +55,3 @@ class StandaloneApplication(WSGIApplication):
         }
         for key, value in config.items():
             self.cfg.set(key.lower(), value)
-
