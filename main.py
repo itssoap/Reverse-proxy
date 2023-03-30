@@ -9,7 +9,6 @@ from aioredis import Redis, from_url, ConnectionError, TimeoutError
 from redis_cache import RedisCache
 import datetime
 import psutil
-from gunicorn.app.wsgiapp import WSGIApplication
 import sys
 
 # logging
@@ -25,7 +24,8 @@ headers = {
     "Connection": "keep-alive",
     "Pragma": "no-cache",
     "Referer": "https://nyaa.si/",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\
+        /537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36",
     "X-Requested-With": "XMLHttpRequest",
     "Access-Control-Allow-Origin": "http://127.0.0.1:8000",
 }

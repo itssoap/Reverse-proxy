@@ -1,8 +1,10 @@
 """
-Reference: https://stackoverflow.com/questions/50211546/converting-byte-to-string-and-back-properly-in-python3
-           https://stackoverflow.com/questions/67413075/store-instance-of-class-in-string
+References: 
+	https://stackoverflow.com/q/50211546/14940695
+	https://stackoverflow.com/q/67413075/14940695
 
-RedisDB is taken from https://github.com/sanjit-sinha/TelegramBot-Boilerplate
+RedisDB is taken from:
+	https://github.com/sanjit-sinha/TelegramBot-Boilerplate
 
 I am rewriting it to cache the HTMLresponse of various pages
 
