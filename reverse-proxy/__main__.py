@@ -277,4 +277,4 @@ if __name__ == "__main__":
         "reload_engine": "inotify",  # requires inotify package
     }
 
-    StandaloneApplication("main:app", options).run()
+    StandaloneApplication("__main__:app", options).run()
