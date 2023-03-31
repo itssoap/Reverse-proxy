@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "reverse-proxy"
+version = "0.3.0"
+description = "Over-engineered Reverse-proxy using FastAPI"
+authors = ["itssoap <admin@itssoap.ninja>"]
+readme = "README.md"
+packages = [{include = "reverse_proxy"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.95.0"
+dotenv = "^0.0.5"
+httpx = "^0.23.3"
+aioredis = "^2.0.1"
+datetime = "^5.1"
+gunicorn = "^20.1.0"
+psutil = "^5.9.4"
+logging = "^0.5.1.2"
+loguru = "^0.6.0"
+uvicorn[standard] = "^0.21.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
