@@ -9,15 +9,15 @@ packages = [{include = "reverse_proxy"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 fastapi = "^0.95.0"
-dotenv = "^0.0.5"
 httpx = "^0.23.3"
 aioredis = "^2.0.1"
 datetime = "^5.1"
 gunicorn = "^20.1.0"
 psutil = "^5.9.4"
-logging = "^0.5.1.2"
 loguru = "^0.6.0"
-uvicorn[standard] = "^0.21.1"
+python-dotenv = "^1.0.0"
+logging = "^0.4.9.6"
+uvicorn = {extras = ["standard"], version = "^0.21.1"}
 
 
 [build-system]
