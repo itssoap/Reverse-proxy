@@ -18,6 +18,7 @@ loguru = "^0.6.0"
 python-dotenv = "^1.0.0"
 logging = "^0.4.9.6"
 uvicorn = {extras = ["standard"], version = "^0.21.1"}
+inotify = "^0.2.10"
 
 
 [build-system]
