@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, Response, JSONResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from dotenv import load_dotenv
@@ -12,7 +12,6 @@ import sys
 
 # logging
 import logging
-from gunicorn.glogging import Logger
 from loguru import logger
 
 from utils import (
