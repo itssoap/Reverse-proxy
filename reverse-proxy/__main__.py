@@ -80,10 +80,10 @@ async def getter(request: Request) -> Response:  # type: ignore
     except KeyError:
         flag = 1
 
-    # returning a Respone class with media_type HTML 
+    # returning a Respone class with media_type HTML
     # to avoid using Union of HTMLResponse and Response
 
-    # The Union breaks the endpoint /docs, as it tries to look up 
+    # The Union breaks the endpoint /docs, as it tries to look up
     # media_type json for openapi.json
 
     return (
