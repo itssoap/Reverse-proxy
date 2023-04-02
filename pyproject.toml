@@ -4,7 +4,7 @@ version = "0.3.2"
 description = "Over-engineered Reverse-proxy using FastAPI"
 authors = ["itssoap <admin@itssoap.ninja>"]
 readme = "README.md"
-packages = [{include = "reverse_proxy"}]
+packages = [{include = "*.py", from = "reverse-proxy"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
