@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 import httpx
 import os
-from aioredis import Redis, from_url, ConnectionError, TimeoutError
+import aioredis
 import datetime
 import psutil
 import sys
@@ -39,9 +39,8 @@ headers = {
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# load_dotenv()
 redis_cache = RedisCache()
-redis = Redis()
+redis = aioredis.Redis()
 
 json_logs = False  # set it to True if you don't love yourselves
 log_level = logging.getLevelName("INFO")
@@ -52,7 +51,7 @@ def startup():
     load_dotenv()
     global redis_cache, redis
     redis_cache = RedisCache()
-    redis = from_url(os.getenv("REDIS_URL"), decode_responses=True)
+    redis = aioredis.from_url(os.getenv("REDIS_URL"), decode_responses=True)
 
 
 @app.get("/", response_model=None, response_class=Response)
@@ -65,7 +64,7 @@ async def getter(request: Request) -> Response:  # type: ignore
             resp.raise_for_status()
 
         else:
-            resp = httpx.get(f"https://nyaa.si/", headers=headers)
+            resp = httpx.get("https://nyaa.si/", headers=headers)
             resp.raise_for_status()
 
     except httpx.HTTPError as exc:
@@ -77,12 +76,15 @@ async def getter(request: Request) -> Response:  # type: ignore
     flag = 0
 
     try:
-        temp = params["page"]
+        _ = params["page"]
     except KeyError:
         flag = 1
 
-    # returning a Respone class with media_type HTML to avoid using Union of HTMLResponse and Response
-    # The Union breaks the endpoint /docs, as it tries to look up media_type json for openapi.json
+    # returning a Respone class with media_type HTML 
+    # to avoid using Union of HTMLResponse and Response
+
+    # The Union breaks the endpoint /docs, as it tries to look up 
+    # media_type json for openapi.json
 
     return (
         Response(content=resp.text, status_code=200, media_type="text/html")
@@ -146,7 +148,7 @@ async def getter(username: str | None = None) -> HTMLResponse:  # type: ignore
 async def getter() -> HTMLResponse:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        resp = httpx.get(f"https://nyaa.si/rules", headers=headers)
+        resp = httpx.get("https://nyaa.si/rules", headers=headers)
         resp.raise_for_status()
 
     except httpx.HTTPError as exc:
@@ -161,12 +163,11 @@ async def getter() -> HTMLResponse:  # type: ignore
 
 @app.get("/help", response_class=HTMLResponse)
 async def getter() -> HTMLResponse:  # type: ignore
-    # resp = ""
     resp = await redis_cache.get(redis, "help")
 
     if resp is None:
         try:
-            resp = httpx.get(f"https://nyaa.si/help", headers=headers)
+            resp = httpx.get("https://nyaa.si/help", headers=headers)
             resp.raise_for_status()
             await redis_cache.set(
                 redis,
@@ -183,7 +184,7 @@ async def getter() -> HTMLResponse:  # type: ignore
                 flush=True,
             )
 
-        except (ConnectionError, TimeoutError) as redexc:
+        except (aioredis.ConnectionError, aioredis.TimeoutError) as redexc:
             log_time = datetime.datetime.now()
             print(
                 f"[{log_time}] [/help/] Redis Exception occurred - {redexc}", flush=True
@@ -199,7 +200,7 @@ async def getter() -> HTMLResponse:  # type: ignore
 async def getter() -> HTMLResponse:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        resp = httpx.get(f"https://nyaa.si/login", headers=headers)
+        resp = httpx.get("https://nyaa.si/login", headers=headers)
         resp.raise_for_status()
 
     except httpx.HTTPError as exc:
@@ -216,7 +217,7 @@ async def getter() -> HTMLResponse:  # type: ignore
 async def getter() -> HTMLResponse:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        resp = httpx.get(f"https://nyaa.si/register", headers=headers)
+        resp = httpx.get("https://nyaa.si/register", headers=headers)
         resp.raise_for_status()
 
     except httpx.HTTPError as exc:
@@ -233,7 +234,7 @@ async def getter() -> HTMLResponse:  # type: ignore
 async def getter() -> HTMLResponse:
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        resp = httpx.get(f"https://nyaa.si/upload", headers=headers)
+        resp = httpx.get("https://nyaa.si/upload", headers=headers)
         resp.raise_for_status()
 
     except httpx.HTTPError as exc:
