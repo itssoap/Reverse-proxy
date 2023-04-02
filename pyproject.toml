@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reverse-proxy"
-version = "0.3.2"
+version = "0.3.3"
 description = "Over-engineered Reverse-proxy using FastAPI"
 authors = ["itssoap <admin@itssoap.ninja>"]
 readme = "README.md"
