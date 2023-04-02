@@ -66,7 +66,7 @@ class RedisCache:
         """
 
         value = await redis.delete(key)
-        return False if value == 0 else True
+        return bool(value)
 
     @staticmethod
     async def encoder(html: HTMLResponse) -> str:

@@ -2,7 +2,6 @@ import logging
 from gunicorn.glogging import Logger
 from loguru import logger
 from gunicorn.app.wsgiapp import WSGIApplication
-from typing import Any
 
 
 log_level = logging.getLevelName("INFO")
