@@ -60,12 +60,12 @@ async def getter(request: Request) -> Response:  # type: ignore
     params = request.query_params
     try:
         if params is not None:
-            async with httpx.AsyncClient as client:
+            async with httpx.AsyncClient() as client:
                 resp = await client.get(f"https://nyaa.si/?{params}", headers=headers)
             resp.raise_for_status()
 
         else:
-            async with httpx.AsyncClient as client:
+            async with httpx.AsyncClient() as client:
                 resp = await client.get("https://nyaa.si/", headers=headers)
             resp.raise_for_status()
 
@@ -99,7 +99,7 @@ async def getter(request: Request) -> Response:  # type: ignore
 async def getter(view_id: int | None = None) -> HTMLResponse:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        async with httpx.AsyncClient as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.get(f"https://nyaa.si/view/{view_id}", headers=headers)
         resp.raise_for_status()
 
@@ -117,7 +117,7 @@ async def getter(view_id: int | None = None) -> HTMLResponse:  # type: ignore
 async def getter(torrent: str | None = None) -> Response:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        async with httpx.AsyncClient as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.get(
                 f"https://nyaa.si/download/{torrent}", headers=headers
             )
@@ -137,7 +137,7 @@ async def getter(torrent: str | None = None) -> Response:  # type: ignore
 async def getter(username: str | None = None) -> HTMLResponse:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        async with httpx.AsyncClient as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.get(f"https://nyaa.si/user/{username}", headers=headers)
         resp.raise_for_status()
 
@@ -155,7 +155,7 @@ async def getter(username: str | None = None) -> HTMLResponse:  # type: ignore
 async def getter() -> HTMLResponse:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        async with httpx.AsyncClient as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.get("https://nyaa.si/rules", headers=headers)
         resp.raise_for_status()
 
@@ -175,7 +175,7 @@ async def getter() -> HTMLResponse:  # type: ignore
 
     if resp is None:
         try:
-            async with httpx.AsyncClient as client:
+            async with httpx.AsyncClient() as client:
                 resp = await client.get("https://nyaa.si/help", headers=headers)
             resp.raise_for_status()
             await redis_cache.set(
@@ -209,7 +209,7 @@ async def getter() -> HTMLResponse:  # type: ignore
 async def getter() -> HTMLResponse:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        async with httpx.AsyncClient as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.get("https://nyaa.si/login", headers=headers)
         resp.raise_for_status()
 
@@ -227,7 +227,7 @@ async def getter() -> HTMLResponse:  # type: ignore
 async def getter() -> HTMLResponse:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        async with httpx.AsyncClient as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.get("https://nyaa.si/register", headers=headers)
         resp.raise_for_status()
 
@@ -245,7 +245,7 @@ async def getter() -> HTMLResponse:  # type: ignore
 async def getter() -> HTMLResponse:
     resp = httpx.Response(status_code=404, text="Default")
     try:
-        async with httpx.AsyncClient as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.get("https://nyaa.si/upload", headers=headers)
         resp.raise_for_status()
 
