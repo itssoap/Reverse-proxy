@@ -279,7 +279,7 @@ if __name__ == "__main__":
     logger.configure(handlers=[{"sink": sys.stdout, "serialize": json_logs}])
 
     options = {
-        "bind": "127.0.0.1:8000",
+        "bind": "0.0.0.0:8000",
         "workers": len(psutil.Process().cpu_affinity()),  # type: ignore
         "accesslog": "-",
         "errorlog": "-",

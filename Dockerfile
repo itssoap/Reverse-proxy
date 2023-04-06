@@ -8,7 +8,7 @@ COPY poetry.lock pyproject.toml ./
 
 RUN apt-get update && apt-get install \
     --no-install-recommends \
-    -y curl build-essential
+    -y curl build-essential redis
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
@@ -17,6 +17,7 @@ ENV PATH="$PATH:~/.local/bin"
 RUN poetry config virtualenvs.create false \
     && poetry install --no-root
 
+RUN redis-server --daemonize yes
 
 
 FROM basepython
@@ -29,4 +30,6 @@ COPY . .
 
 ENV PYTHONPATH "${PYTHONPATH}:/app"
 
-CMD ["python3", "reverse-proxy"]
+EXPOSE 8000
+
+CMD ["bash", "start.sh"]

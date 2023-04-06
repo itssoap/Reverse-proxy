@@ -1,19 +1,12 @@
 version: '3'
 
 services:
-
-  redis:
-    tty: true
-    image: redis
-    network_mode: "host"
-
   revproxy:
     tty: true
     build:
       context: .
       dockerfile: Dockerfile
-    image: itssoap/revproxy:0.0.1
-    depends_on:
-      - redis
-    network_mode: "host"
+    image: itssoap/revproxy:0.1.0
     container_name: revproxy
+    ports:
+      - "8000:8000"
