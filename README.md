@@ -13,7 +13,9 @@ Disclaimer: This module has been made for educational purposes and serves as a P
 ## Index
 
 - [Requirements](#requirements)
-- [Installation](#installation)
+- Installation
+  - via [`Poetry`](#poetry)
+  - via [`Docker`](#docker)
 - [Run](#run)
 - [Usage](#usage)
 - [Advanced](#advanced)
@@ -25,8 +27,17 @@ Disclaimer: This module has been made for educational purposes and serves as a P
 - Python 3.10+ (Usage of built-in unions instead from `typing` module)
 - Poetry for Python (Handling dependencies and running the server)
 - Redis Instance (**Optional**)
+- Docker and docker-compose (**Optional**)
 
 ## Installation
+
+The first step:
+
+```bash
+git clone https://github.com/itssoap/Reverse-proxy.git && cd Reverse-proxy
+```
+
+### Poetry
 
 The installation process is handled effortlessly with Poetry.
 
@@ -44,9 +55,22 @@ poetry shell
 poetry install
 ```
 
-- That's it!
+- That's it!\
+&nbsp;
+---
+### Docker!
+
+![Installation Instructions](https://user-images.githubusercontent.com/6275744/230888549-3ff2aac7-4f52-4939-9520-a20a9d638b8e.png)
+
+
+I use docker-compose for installation (root or non-root, depends on your mileage). The Dockerfile has been made for zero-configuration by default, and also initiates Redis on its own. Based on your usage, remove Redis if unnecessary.
+
+```properties
+docker-compose up -d
+```
 
 ## Run
+> Only required if you are not using Docker or you have a custom Redis instance.
 - First, edit the .env file properly and set the `REDIS_URL` variable. If you don't want to host your own Redis instance, you can create a free instance from [Railway](https://railway.app)
 
 ```properties
@@ -65,14 +89,14 @@ python reverse-proxy
 ## Usage
 >By default, the proxy doesn't run as a daemon
 
-- Using Screen
+- Using Screen\
 Run the proxy inside a UNIX Screen, so that you can let it run in the background.
 
-- Using systemd service
-Coming Soon!
+- Using systemd service\
+~Coming Soon!~ DIY
 
-- Inside a docker container
-Coming Soon!
+- Inside a docker container\
+Please refer to the [`Docker`](#docker) installation steps for the same. For managing the image on a remote server, I recommend using [lazydocker](https://github.com/jesseduffield/lazydocker)
 
 ## Advanced
 To run it as a daemon, add:
@@ -86,6 +110,6 @@ in `options` dict in `reverse-proxy/__main__.py:main`
 > To better understand how Redis caching can be enabled/used for certain end-points, please refer to the implementation of the `/help` end-point
 
 ## Future plans
-- Dockerize for OS-agnostic run
+- ~Dockerize for OS-agnostic run~ Done
 - Improve how the number of workers is set
 - Make a non-Redis version/Redis decorator with a bool switch
