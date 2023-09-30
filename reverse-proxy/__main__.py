@@ -9,6 +9,7 @@ import aioredis
 import datetime
 import psutil
 import sys
+from fastapi_queue import RateLimiter
 
 # logging
 import logging
@@ -41,20 +42,27 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 redis_cache = RedisCache()
 redis = aioredis.Redis()
+queue = aioredis.Redis()
 
 json_logs = False  # set it to True if you don't love yourselves
 log_level = logging.getLevelName("INFO")
 
+rate = RateLimiter(bucket = 5000, limits_s = 1000)
+
 
 @app.on_event("startup")
 def startup():
+    rate.porter_run_serve()
     load_dotenv()
-    global redis_cache, redis
+    global redis_cache, redis, queue
     redis_cache = RedisCache()
-    redis = aioredis.from_url(os.getenv("REDIS_URL"), decode_responses=True)
+    redis = aioredis.from_url(str(os.getenv("REDIS_URL"))+":6379", decode_responses=True)
+    queue = aioredis.from_url(str(os.getenv("REDIS_URL"))+":6380", decode_responses=True)
+    
 
 
 @app.get("/", response_model=None, response_class=Response)
+@rate
 async def getter(request: Request) -> Response:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
     params = request.query_params

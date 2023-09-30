@@ -17,7 +17,9 @@ ENV PATH="$PATH:~/.local/bin"
 RUN poetry config virtualenvs.create false \
     && poetry install --no-root
 
-RUN redis-server --daemonize yes
+RUN redis-server --daemonize yes 
+
+RUN redis-server --daemonize yes --port 6380
 
 
 FROM basepython
