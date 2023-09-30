@@ -134,12 +134,19 @@ async def getter(torrent: str | None = None) -> Response:  # type: ignore
 
 
 @app.get("/user/{username}", response_class=HTMLResponse)
-async def getter(username: str | None = None) -> HTMLResponse:  # type: ignore
+async def getter(request: Request, username: str | None = None) -> HTMLResponse:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
+    params = request.query_params
     try:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(f"https://nyaa.si/user/{username}", headers=headers)
-        resp.raise_for_status()
+        if params is not None:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(f"https://nyaa.si/user/{username}?{params}", headers=headers)
+            resp.raise_for_status()
+
+        else:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get("https://nyaa.si/user/{username}", headers=headers)
+            resp.raise_for_status()
 
     except httpx.HTTPError as exc:
         log_time = datetime.datetime.now()
