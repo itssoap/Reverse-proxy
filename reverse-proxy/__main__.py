@@ -57,11 +57,16 @@ def startup():
 @app.get("/", response_model=None, response_class=Response)
 async def getter(request: Request) -> Response:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
-    params = request.query_params
+    params = request.query_params  # type: ignore
     try:
-        if params is not None:
+        if params is not None and len(params) > 0:
+            params: dict = dict(
+                [tuple(i.split("=")) for i in str(params).split("&")]  # type: ignore
+            )
             async with httpx.AsyncClient() as client:
-                resp = await client.get(f"https://nyaa.si/?{params}", headers=headers)
+                resp = await client.get(
+                    f"https://nyaa.si/", params=params, headers=headers
+                )
             resp.raise_for_status()
 
         else:
@@ -136,16 +141,22 @@ async def getter(torrent: str | None = None) -> Response:  # type: ignore
 @app.get("/user/{username}", response_class=HTMLResponse)
 async def getter(request: Request, username: str | None = None) -> HTMLResponse:  # type: ignore
     resp = httpx.Response(status_code=404, text="Default")
-    params = request.query_params
+    params = request.query_params  # type: ignore
     try:
-        if params is not None:
-            async with httpx.AsyncClient() as client:
-                resp = await client.get(f"https://nyaa.si/user/{username}?{params}", headers=headers)
+        if params is not None and len(params) > 0:
+            params: dict = dict(
+                [tuple(i.split("=")) for i in str(params).split("&")]  # type: ignore
+            )
+            resp = httpx.get(
+                f"https://nyaa.si/user/{username}", params=params, headers=headers
+            )
             resp.raise_for_status()
 
         else:
             async with httpx.AsyncClient() as client:
-                resp = await client.get("https://nyaa.si/user/{username}", headers=headers)
+                resp = await client.get(
+                    f"https://nyaa.si/user/{username}", headers=headers
+                )
             resp.raise_for_status()
 
     except httpx.HTTPError as exc:

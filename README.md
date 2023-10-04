@@ -19,6 +19,7 @@ Disclaimer: This module has been made for educational purposes and serves as a P
 - [Run](#run)
 - [Usage](#usage)
 - [Advanced](#advanced)
+- [Release notes](#notes)
 - [Future plans](#future-plans)
 
 ## Requirements
@@ -108,6 +109,14 @@ in `options` dict in `reverse-proxy/__main__.py:main`
 > This repo might look like a reverse-proxy for a particular web address, but it is to show an example of how different end-points which may return different type of responses should be handled.
 
 > To better understand how Redis caching can be enabled/used for certain end-points, please refer to the implementation of the `/help` end-point
+
+## Release notes
+`0.6.0`
+```md
+- Bug fix: Sorting on a user's torrent page works now (better handling of Query parameters in httpx requests)
+- Formatting changes with Python Black
+- Additional type safety
+```
 
 ## Future plans
 - ~Dockerize for OS-agnostic run~ Done
